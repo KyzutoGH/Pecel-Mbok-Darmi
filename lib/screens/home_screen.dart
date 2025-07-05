@@ -1,11 +1,105 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import '../models/promo_card.dart';
 import '../models/menu_item.dart';
 import '../widgets/promo_card.dart';
 import '../widgets/menu_item_card.dart';
-import '../widgets/category_button.dart';
 import 'menu_screen.dart';
+
+// Model untuk CategoryItem
+class CategoryItem {
+  final String id;
+  final String title;
+  final Color color;
+  final IconData icon;
+
+  CategoryItem({
+    required this.id,
+    required this.title,
+    required this.color,
+    required this.icon,
+  });
+}
+
+// Widget CategoryButtonList
+class CategoryButtonList extends StatelessWidget {
+  final List<CategoryItem> categories;
+  final void Function(String) onCategorySelected;
+  final String? selectedCategory;
+
+  const CategoryButtonList({
+    Key? key,
+    required this.categories,
+    required this.onCategorySelected,
+    this.selectedCategory,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: categories.map((category) {
+          bool isSelected = selectedCategory == category.id;
+          return Expanded(
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 4),
+              child: GestureDetector(
+                onTap: () => onCategorySelected(category.id),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? category.color.withOpacity(0.9)
+                        : category.color,
+                    borderRadius: BorderRadius.circular(12),
+                    border: isSelected
+                        ? Border.all(color: Colors.white, width: 2)
+                        : null,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(
+                          isSelected ? 0.15 : 0.1,
+                        ),
+                        blurRadius: isSelected ? 6 : 4,
+                        offset: Offset(0, isSelected ? 3 : 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        category.icon,
+                        color: Colors.white,
+                        size: isSelected ? 20 : 18,
+                      ),
+                      SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          category.title,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: isSelected ? 13 : 12,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -14,7 +108,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  final CardSwiperController _cardController = CardSwiperController();
+  PageController _pageController = PageController();
+  int _currentPromoIndex = 0;
 
   List<PromoCard> promoCards = [];
   List<MenuItem> featuredMenuItems = [];
@@ -26,26 +121,32 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadData();
   }
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void _loadData() {
     // Load promo cards
     promoCards = [
       PromoCard(
         title: 'Promo 20%',
         subtitle: 'Untuk 10 Pembeli Pertama',
-        imageUrl: 'assets/images/food1.jpg',
+        imageUrl: 'images/pecel1.jpg',
         discount: '20%',
       ),
       PromoCard(
-        title: 'Promo 30%',
-        subtitle: 'Untuk 5 Pembeli Pertama',
-        imageUrl: 'assets/images/food2.jpg',
-        discount: '30%',
+        title: 'Promo 15%',
+        subtitle: 'Untuk Member Baru',
+        imageUrl: 'images/pecel2.jpg',
+        discount: '15%',
       ),
       PromoCard(
-        title: 'Buy 1 Get 1',
-        subtitle: 'Khusus Minuman Hari Ini',
-        imageUrl: 'assets/images/food3.jpg',
-        discount: 'BOGO',
+        title: 'Promo 25%',
+        subtitle: 'Menu Spesial Hari Ini',
+        imageUrl: 'images/pecel3.jpg',
+        discount: '25%',
       ),
     ];
 
@@ -56,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
         name: 'Pecel Sembal Tumpang',
         description: 'Pecel Sambel Tumpang, Pecel Nasi Uduk',
         rating: 4.5,
-        imageUrl: 'assets/images/pecel1.jpg',
+        imageUrl: 'images/pecel2.jpg',
         price: 15000,
         category: 'special',
       ),
@@ -65,18 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
         name: 'Pecel Sambel',
         description: 'Pecel tradisional dengan sambel khas',
         rating: 4.5,
-        imageUrl: 'assets/images/pecel2.jpg',
+        imageUrl: 'images/pecel2.jpg',
         price: 12000,
         category: 'special',
-      ),
-      MenuItem(
-        id: '3',
-        name: 'Gado-Gado Special',
-        description: 'Gado-gado dengan bumbu kacang spesial',
-        rating: 4.3,
-        imageUrl: 'assets/images/gado.jpg',
-        price: 13000,
-        category: 'popular',
       ),
     ];
 
@@ -123,140 +215,96 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {},
+        title: Text(
+          'Pecel Mbok Darmi',
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
-        title: Row(
-          children: [
-            Icon(Icons.refresh, color: Colors.black),
-            SizedBox(width: 8),
-            Text(
-              'localhost:58304/#',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.star_border, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.shield_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.person_outline, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.more_vert, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
+        centerTitle: false,
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header dengan Stack untuk promo cards
+            // Header dengan promo cards menggunakan PageView
             Container(
-              height: 220,
-              child: Stack(
-                children: [
-                  // Promo Cards dengan CardSwiper
-                  Container(
-                    height: 180,
-                    margin: EdgeInsets.all(16),
-                    child: promoCards.isEmpty
-                        ? Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Tidak ada promo tersedia',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 16,
+              height: 200,
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: promoCards.isEmpty
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Tidak ada promo tersedia',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Stack(
+                      children: [
+                        // PageView untuk promo cards
+                        PageView.builder(
+                          controller: _pageController,
+                          itemCount: promoCards.length,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentPromoIndex = index;
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: EdgeInsets.symmetric(horizontal: 4),
+                              child: PromoCardWidget(
+                                promoCard: promoCards[index],
+                                onTap: () {
+                                  print(
+                                    'Promo ${promoCards[index].title} tapped',
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                        // Indikator dots
+                        Positioned(
+                          bottom: 12,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              promoCards.length,
+                              (index) => Container(
+                                width: 8,
+                                height: 8,
+                                margin: EdgeInsets.symmetric(horizontal: 4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _currentPromoIndex == index
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.5),
                                 ),
                               ),
                             ),
-                          )
-                        : CardSwiper(
-                            controller: _cardController,
-                            cardsCount: promoCards.length,
-                            onSwipe: (previousIndex, currentIndex, direction) {
-                              return true;
-                            },
-                            cardBuilder:
-                                (
-                                  context,
-                                  index,
-                                  percentThresholdX,
-                                  percentThresholdY,
-                                ) {
-                                  return PromoCardWidget(
-                                    promoCard: promoCards[index],
-                                    onTap: () {
-                                      // Handle promo card tap
-                                      print(
-                                        'Promo ${promoCards[index].title} tapped',
-                                      );
-                                    },
-                                  );
-                                },
                           ),
-                  ),
-
-                  // Keterangan penggunaan Stack
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'Gunakan penyusunan secara Stack dibagian ini',
-                        style: TextStyle(color: Colors.white, fontSize: 10),
-                      ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ),
 
             // Menu kategori dengan ListView horizontal
             CategoryButtonList(
               categories: categories,
               onCategorySelected: _onCategorySelected,
-            ),
-
-            // Keterangan ListView
-            Container(
-              margin: EdgeInsets.all(16),
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.shade100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                'Gunakan ListView dan bisa di scroll ke kanan-kiri',
-                style: TextStyle(color: Colors.red.shade800, fontSize: 12),
-              ),
             ),
 
             // Menu Pilihan header
@@ -293,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Menu items dengan SingleChildScrollView
+            // Menu items dengan ListView vertikal
             Container(
               margin: EdgeInsets.symmetric(horizontal: 16),
               child: featuredMenuItems.isEmpty
@@ -320,97 +368,201 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     )
-                  : Column(
-                      children: featuredMenuItems
-                          .map(
-                            (item) => MenuItemCard(
-                              menuItem: item,
-                              onTap: () {
-                                _showMenuDetail(item);
-                              },
-                              onAddToCart: () => _addToCart(item),
-                            ),
-                          )
-                          .toList(),
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: featuredMenuItems.length,
+                      itemBuilder: (context, index) {
+                        final item = featuredMenuItems[index];
+                        return MenuItemCard(
+                          menuItem: item,
+                          onTap: () {
+                            _showMenuDetail(item);
+                          },
+                          onAddToCart: () => _addToCart(item),
+                        );
+                      },
                     ),
             ),
 
-            // Keterangan SingleChildScrollView
-            Container(
-              margin: EdgeInsets.all(16),
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                'Gunakan SingleChildScrollView kebawah',
-                style: TextStyle(color: Colors.blue.shade800, fontSize: 12),
+            // Space for bottom navigation
+            SizedBox(height: 120),
+          ],
+        ),
+      ),
+      // Custom Bottom Navigation dengan floating menu button
+      bottomNavigationBar: Container(
+        height: 90,
+        child: Stack(
+          children: [
+            // Background untuk bottom navigation
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 70,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, -5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // Home Button
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _currentIndex = 0;
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.home_outlined,
+                                color: _currentIndex == 0
+                                    ? Colors.orange
+                                    : Colors.grey,
+                                size: 24,
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Home',
+                                style: TextStyle(
+                                  color: _currentIndex == 0
+                                      ? Colors.orange
+                                      : Colors.grey,
+                                  fontSize: 12,
+                                  fontWeight: _currentIndex == 0
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Space untuk menu button
+                    SizedBox(width: 100),
+
+                    // Cart Button
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _currentIndex = 2;
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.shopping_cart_outlined,
+                                color: _currentIndex == 2
+                                    ? Colors.orange
+                                    : Colors.grey,
+                                size: 24,
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Keranjang',
+                                style: TextStyle(
+                                  color: _currentIndex == 2
+                                      ? Colors.orange
+                                      : Colors.grey,
+                                  fontSize: 12,
+                                  fontWeight: _currentIndex == 2
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
-            // FlutterClipPolygon section
-            Container(
-              margin: EdgeInsets.all(16),
-              height: 100,
-              child: ClipPath(
-                clipper: CustomPolygonClipper(),
+            // Floating Menu Button
+            Positioned(
+              top: 0,
+              left: MediaQuery.of(context).size.width / 2 - 35,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _currentIndex = 1;
+                  });
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MenuScreen()),
+                  );
+                },
                 child: Container(
-                  color: Colors.orange,
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
                   child: Center(
-                    child: Text(
-                      'FlutterClipPolygon',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    child: Container(
+                      width: 60,
+                      height: 50,
+                      child: ClipPath(
+                        clipper: HexagonClipper(),
+                        child: Container(
+                          color: Colors.yellow[600],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.restaurant_menu,
+                                color: Colors.black87,
+                                size: 20,
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Menu',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-
-            SizedBox(height: 100), // Space for bottom navigation
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MenuScreen()),
-            );
-          }
-        },
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: _currentIndex == 1 ? Colors.yellow : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.restaurant_menu,
-                color: _currentIndex == 1 ? Colors.black : Colors.grey,
-              ),
-            ),
-            label: 'Menu',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Keranjang',
-          ),
-        ],
       ),
     );
   }
@@ -532,20 +684,53 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Custom Polygon Clipper for FlutterClipPolygon
+// Improved Hexagon Clipper
+class HexagonClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+
+    double width = size.width;
+    double height = size.height;
+
+    // Create hexagon shape
+    path.moveTo(width * 0.2, height * 0.1);
+    path.lineTo(width * 0.8, height * 0.1);
+    path.lineTo(width * 0.95, height * 0.5);
+    path.lineTo(width * 0.8, height * 0.9);
+    path.lineTo(width * 0.2, height * 0.9);
+    path.lineTo(width * 0.05, height * 0.5);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+// Keep the old CustomPolygonClipper for backward compatibility
 class CustomPolygonClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
 
-    path.moveTo(0, size.height * 0.3);
-    path.lineTo(size.width * 0.3, 0);
-    path.lineTo(size.width * 0.7, 0);
-    path.lineTo(size.width, size.height * 0.3);
-    path.lineTo(size.width, size.height * 0.7);
-    path.lineTo(size.width * 0.7, size.height);
-    path.lineTo(size.width * 0.3, size.height);
-    path.lineTo(0, size.height * 0.7);
+    double width = size.width;
+    double height = size.height;
+
+    // Start from left middle
+    path.moveTo(0, height * 0.5);
+    // Top left
+    path.lineTo(width * 0.15, height * 0.1);
+    // Top right
+    path.lineTo(width * 0.85, height * 0.1);
+    // Right middle
+    path.lineTo(width, height * 0.5);
+    // Bottom right
+    path.lineTo(width * 0.85, height * 0.9);
+    // Bottom left
+    path.lineTo(width * 0.15, height * 0.9);
+    // Close the path
     path.close();
 
     return path;
