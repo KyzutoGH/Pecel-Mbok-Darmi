@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/promo_card.dart';
 import '../models/menu_item.dart';
-import '../widgets/promo_card.dart';
-import '../widgets/menu_item_card.dart';
 import 'menu_screen.dart';
 import 'dart:math' show cos, sin;
 
@@ -107,7 +105,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _currentIndex = 0;
   late PageController _pageController;
-  int _currentPromoIndex = 0;
   String? _selectedCategory;
 
   List<PromoCard> promoCards = [];
@@ -518,97 +515,84 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
-        child: Stack(
-          children: [
-            // Main content
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Menu Image - Square
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      image: DecorationImage(
-                        image: AssetImage(item.imageUrl),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // Menu Details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Menu Name
-                        Text(
-                          item.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-
-                        // Menu Description
-                        Text(
-                          item.description,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Rating Badge - Positioned at top right
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Menu Image - Square
+              Container(
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.amber,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(12),
-                    bottomLeft: Radius.circular(12),
+                  borderRadius: BorderRadius.zero,
+                  image: DecorationImage(
+                    image: AssetImage(item.imageUrl),
+                    fit: BoxFit.cover,
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              ),
+              const SizedBox(width: 12),
+
+              // Menu Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.star, color: Colors.white, size: 14),
-                    const SizedBox(width: 2),
-                    Text(
-                      item.rating.toString(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    // Rating Badge - Baris pertama
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
+                      decoration: BoxDecoration(
+                        color: Colors.amber,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.star, color: Colors.white, size: 12),
+                          const SizedBox(width: 2),
+                          Text(
+                            item.rating.toString(),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+
+                    // Menu Name - Baris kedua
+                    Text(
+                      item.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Menu Description - Baris ketiga
+                    Text(
+                      item.description,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -783,8 +767,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               Icon(
                                 Icons.home,
                                 color: _currentIndex == 0
-                                    ? Colors.orange
-                                    : Colors.grey,
+                                    ? const Color.fromARGB(255, 0, 0, 0)
+                                    : const Color.fromARGB(255, 0, 0, 0),
                                 size: 24,
                               ),
                               const SizedBox(height: 0),
@@ -792,8 +776,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 'Home',
                                 style: TextStyle(
                                   color: _currentIndex == 0
-                                      ? Colors.orange
-                                      : Colors.grey,
+                                      ? const Color.fromARGB(255, 0, 0, 0)
+                                      : const Color.fromARGB(255, 0, 0, 0),
                                   fontSize: 12,
                                   fontWeight: _currentIndex == 0
                                       ? FontWeight.w600
@@ -830,8 +814,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   Icon(
                                     Icons.shopping_cart,
                                     color: _currentIndex == 2
-                                        ? Colors.orange
-                                        : Colors.grey,
+                                        ? const Color.fromARGB(255, 0, 0, 0)
+                                        : const Color.fromARGB(255, 0, 0, 0),
                                     size: 24,
                                   ),
                                   // Badge untuk jumlah item di keranjang
@@ -851,7 +835,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       child: const Text(
                                         '0',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: Color.fromARGB(255, 0, 0, 0),
                                           fontSize: 8,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -866,8 +850,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 'Keranjang',
                                 style: TextStyle(
                                   color: _currentIndex == 2
-                                      ? Colors.orange
-                                      : Colors.grey,
+                                      ? const Color.fromARGB(255, 0, 0, 0)
+                                      : const Color.fromARGB(255, 0, 0, 0),
                                   fontSize: 12,
                                   fontWeight: _currentIndex == 2
                                       ? FontWeight.w600
@@ -923,14 +907,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         children: [
                           Icon(
                             Icons.restaurant_menu,
-                            color: Colors.white,
+                            color: Color.fromARGB(255, 0, 0, 0),
                             size: 24,
                           ),
                           SizedBox(height: 4),
                           Text(
                             'Menu',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Color.fromARGB(255, 0, 0, 0),
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
