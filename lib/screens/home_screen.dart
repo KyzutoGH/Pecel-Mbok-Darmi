@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/promo_card.dart';
 import '../models/menu_item.dart';
-import '../widgets/promo_card.dart';
-import '../widgets/menu_item_card.dart';
 import 'menu_screen.dart';
 import 'dart:math' show cos, sin;
 
@@ -107,7 +105,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _currentIndex = 0;
   late PageController _pageController;
-  int _currentPromoIndex = 0;
   String? _selectedCategory;
 
   List<PromoCard> promoCards = [];
@@ -494,16 +491,237 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 final item = featuredMenuItems[index];
                 return Container(
                   margin: const EdgeInsets.only(bottom: 8),
-                  child: MenuItemCard(
-                    menuItem: item,
-                    onTap: () {
-                      _showMenuDetail(item);
-                    },
-                    onAddToCart: () => _addToCart(item),
-                  ),
+                  child: _buildHorizontalMenuCard(item),
                 );
               },
             ),
+    );
+  }
+
+  Widget _buildHorizontalMenuCard(MenuItem item) {
+    return GestureDetector(
+      onTap: () => _showMenuDetail(item),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Menu Image - Square
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.zero,
+                  image: DecorationImage(
+                    image: AssetImage(item.imageUrl),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Menu Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Rating Badge - Baris pertama
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.amber,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.star, color: Colors.white, size: 12),
+                          const SizedBox(width: 2),
+                          Text(
+                            item.rating.toString(),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+
+                    // Menu Name - Baris kedua
+                    Text(
+                      item.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Menu Description - Baris ketiga
+                    Text(
+                      item.description,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMenuDetail(MenuItem menuItem) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.8,
+        maxChildSize: 0.9,
+        minChildSize: 0.5,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 20),
+                width: 50,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              // Menu image
+              Container(
+                height: 200,
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  image: DecorationImage(
+                    image: AssetImage(menuItem.imageUrl),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+
+              // Menu details
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          menuItem.name,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              color: Colors.orange,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 9),
+                            Text(
+                              menuItem.rating.toString(),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          menuItem.description,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Harga: ${menuItem.formattedPrice}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green[600],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _addToCart(menuItem);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text(
+                              'Tambah ke Keranjang',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -549,8 +767,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               Icon(
                                 Icons.home,
                                 color: _currentIndex == 0
-                                    ? Colors.orange
-                                    : Colors.grey,
+                                    ? const Color.fromARGB(255, 0, 0, 0)
+                                    : const Color.fromARGB(255, 0, 0, 0),
                                 size: 24,
                               ),
                               const SizedBox(height: 0),
@@ -558,8 +776,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 'Home',
                                 style: TextStyle(
                                   color: _currentIndex == 0
-                                      ? Colors.orange
-                                      : Colors.grey,
+                                      ? const Color.fromARGB(255, 0, 0, 0)
+                                      : const Color.fromARGB(255, 0, 0, 0),
                                   fontSize: 12,
                                   fontWeight: _currentIndex == 0
                                       ? FontWeight.w600
@@ -596,8 +814,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   Icon(
                                     Icons.shopping_cart,
                                     color: _currentIndex == 2
-                                        ? Colors.orange
-                                        : Colors.grey,
+                                        ? const Color.fromARGB(255, 0, 0, 0)
+                                        : const Color.fromARGB(255, 0, 0, 0),
                                     size: 24,
                                   ),
                                   // Badge untuk jumlah item di keranjang
@@ -617,7 +835,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       child: const Text(
                                         '0',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: Color.fromARGB(255, 0, 0, 0),
                                           fontSize: 8,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -632,8 +850,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 'Keranjang',
                                 style: TextStyle(
                                   color: _currentIndex == 2
-                                      ? Colors.orange
-                                      : Colors.grey,
+                                      ? const Color.fromARGB(255, 0, 0, 0)
+                                      : const Color.fromARGB(255, 0, 0, 0),
                                   fontSize: 12,
                                   fontWeight: _currentIndex == 2
                                       ? FontWeight.w600
@@ -689,14 +907,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         children: [
                           Icon(
                             Icons.restaurant_menu,
-                            color: Colors.white,
+                            color: Color.fromARGB(255, 0, 0, 0),
                             size: 24,
                           ),
                           SizedBox(height: 4),
                           Text(
                             'Menu',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Color.fromARGB(255, 0, 0, 0),
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
@@ -710,137 +928,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showMenuDetail(MenuItem menuItem) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.8,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 20),
-                width: 50,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Menu image
-              Container(
-                height: 200,
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  image: DecorationImage(
-                    image: AssetImage(menuItem.imageUrl),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-
-              // Menu details
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          menuItem.name,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              color: Colors.orange,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              menuItem.rating.toString(),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          menuItem.description,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Harga: ${menuItem.formattedPrice}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green[600],
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              _addToCart(menuItem);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                              ),
-                            ),
-                            child: const Text(
-                              'Tambah ke Keranjang',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -886,7 +973,8 @@ class HexagonClipper extends CustomClipper<Path> {
     // Titik hexagon dimulai dari atas
     List<Offset> points = [];
     for (int i = 0; i < 6; i++) {
-      double angle = (i * 60 - 90) * (3.14159 / 180); // -90 untuk mulai dari atas
+      double angle =
+          (i * 60 - 90) * (3.14159 / 180); // -90 untuk mulai dari atas
       double x = centerX + radius * cos(angle);
       double y = centerY + radius * sin(angle);
       points.add(Offset(x, y));

@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Food Menu App',
+      title: 'Warung Pecel - Mbok Darmi',
       theme: ThemeData(
         primarySwatch: Colors.orange,
         fontFamily: 'Roboto',
