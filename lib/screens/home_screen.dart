@@ -870,7 +870,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 }
 
-// Improved Hexagon Clipper - disesuaikan dengan bentuk di gambar
+// Improved Hexagon Clipper
 class HexagonClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
